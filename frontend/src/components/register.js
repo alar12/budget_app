@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Container, Paper, Grid, TextField, Button } from '@material-ui/core';
 import Navbar from './navbar';
+import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,17 +27,19 @@ const Register = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Implement your registration logic here
-    console.log(formData);
-    // Reset form after submission
-    setFormData({
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-    });
+
+    if (formData.password !== formData.confirmPassword) {
+      return alert("Passwords don't match");
+    }
+
+    try {
+      const response = await axios.post('http://localhost:5000/AdminReg', formData);
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (

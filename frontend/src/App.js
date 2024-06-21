@@ -5,6 +5,8 @@ import Home from './components/home';
 import Login from './components/login';
 import Register from './components/register';
 import ForgotPassword from './components/forgotpassword';
+import 'process/browser';
+import { Buffer } from 'buffer';
 
 function App() {
   return (
