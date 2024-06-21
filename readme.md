@@ -70,7 +70,9 @@ To get a local copy of the project up and running, follow these steps:
 
      ```bash
      # From the backend directory
-     npm start
+     npm start 
+
+     # backend will be running on port 5000
      ```
 
    - Start the frontend development server:
