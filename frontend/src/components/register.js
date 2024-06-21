@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Container, Paper, Grid, TextField, Button } from '@material-ui/core';
+import { Container, Paper, Grid, TextField, Button, Snackbar } from '@material-ui/core';
+import MuiAlert from '@material-ui/lab/Alert';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './navbar';
 import axios from 'axios';
 
@@ -15,6 +17,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Register = () => {
   const classes = useStyles();
+  const navigate = useNavigate(); 
 
   const [formData, setFormData] = useState({
     username: '',
@@ -23,8 +26,19 @@ const Register = () => {
     confirmPassword: '',
   });
 
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
   };
 
   const handleSubmit = async (e) => {
@@ -37,8 +51,27 @@ const Register = () => {
     try {
       const response = await axios.post('http://localhost:5000/AdminReg', formData);
       console.log(response.data);
+
+      // Handle successful registration
+      setOpenSnackbar(true);
+      setSnackbarSeverity('success');
+      setSnackbarMessage('Registration successful! Redirecting to login page...');
+
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+
     } catch (error) {
       console.error(error);
+
+      // Handle registration error
+      setOpenSnackbar(true);
+      setSnackbarSeverity('error');
+      if (error.message === "Request failed with status code 400"){
+        setSnackbarMessage('Registration failed email already exists');
+      }else{
+        setSnackbarMessage(error.message || 'Registration failed');
+      }
     }
   };
 
@@ -100,6 +133,18 @@ const Register = () => {
           </form>
         </Paper>
       </Container>
+
+      {/* Snackbar for showing success/error message */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={2000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <MuiAlert elevation={6} variant="filled" onClose={handleSnackbarClose} severity={snackbarSeverity}>
+          {snackbarMessage}
+        </MuiAlert>
+      </Snackbar>
     </div>
   );
 };

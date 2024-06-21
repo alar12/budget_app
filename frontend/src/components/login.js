@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import { Container, Grid, Paper, TextField, Button } from '@material-ui/core';
 import Navbar from './navbar';
@@ -21,6 +22,7 @@ const useStyles = makeStyles((theme) => ({
 
 const LoginPage = () => {
   const classes = useStyles();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -36,8 +38,11 @@ const LoginPage = () => {
 
     try {
       const response = await axios.post('http://localhost:5000/AdminLogin', formData);
-      console.log(response.data);
-      // Handle successful login here
+      const token = response.data.token;
+      console.log(token);
+      localStorage.setItem('token', token);
+      navigate('/home');
+
     } catch (error) {
       console.error(error);
     }
