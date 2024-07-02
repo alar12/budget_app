@@ -1,0 +1,22 @@
+
+.home-container {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-width: 600px;
+    width: 100%;
+  }
+  
+  .expense-item {
+    margin-bottom: 15px;
+  }
+  
+  .forecast {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    background-color: #e9f7ff;
+  }
+  
