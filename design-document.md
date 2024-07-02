@@ -67,10 +67,10 @@ This document provides an overview of the architecture and design of the Budget 
 
 ```mermaid
 graph TD
-    A[User] -->|Access| B[Frontend (React.js)]
-    B -->|API Requests| C[Backend (Node.js and Express)]
-    C -->|CRUD Operations| D[Database (MongoDB)]
-    C -->|Authentication| E[JWT (JSON Web Token)]
+    A[User] -->|Access| B[Frontend - React.js]
+    B -->|API Requests| C[Backend - Node.js + Express]
+    C -->|CRUD Operations| D[Database - MongoDB]
+    C -->|Authentication| E[JWT - JSON Web Token]
     C -->|Data Encryption| F[Encryption Service]
 ```
 
@@ -84,13 +84,13 @@ graph TD
     actorUser --> useCaseSetSavingsGoals(SetSavingsGoals)
     actorUser --> useCaseViewProgress(ViewSavingsProgress)
     actorUser --> useCaseUpdateProfile(UpdateProfile)
-    useCaseLogin -->|Interact| backendNode[Backend (Node.js and Express)]
+    useCaseLogin -->|Interact| backendNode[Backend - Node.js + Express]
     useCaseRegister -->|Interact| backendNode
     useCaseForecastBudget -->|Interact| backendNode
     useCaseSetSavingsGoals -->|Interact| backendNode
     useCaseViewProgress -->|Interact| backendNode
     useCaseUpdateProfile -->|Interact| backendNode
-    backendNode -->|CRUD Operations| databaseMongoDB[Database (MongoDB)]
+    backendNode -->|CRUD Operations| databaseMongoDB[Database - MongoDB]
 ```
 
 ### 3. Component Diagram
