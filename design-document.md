@@ -80,10 +80,10 @@ graph TD
 graph TD
     actorUser(User) --> useCaseLogin(Login)
     actorUser --> useCaseRegister(Register)
-    actorUser --> useCaseForecastBudget(Forecast Monthly Budget)
-    actorUser --> useCaseSetSavingsGoals(Set Savings Goals)
-    actorUser --> useCaseViewProgress(View Savings Progress)
-    actorUser --> useCaseUpdateProfile(Update Profile)
+    actorUser --> useCaseForecastBudget(ForecastMonthlyBudget)
+    actorUser --> useCaseSetSavingsGoals(SetSavingsGoals)
+    actorUser --> useCaseViewProgress(ViewSavingsProgress)
+    actorUser --> useCaseUpdateProfile(UpdateProfile)
     useCaseLogin -->|Interact| backendNode[Backend (Node.js + Express)]
     useCaseRegister -->|Interact| backendNode
     useCaseForecastBudget -->|Interact| backendNode
