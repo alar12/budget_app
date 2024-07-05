@@ -127,4 +127,4 @@ To get a local copy of the project up and running, follow these steps:
 - **Project Management**: Git Issue Board for task tracking and sprint planning.
 
 ## Design Document
-https://github.com/alar12/budget_app/blob/adithya-feature/design-document.md
+https://github.com/alar12/budget_app/blob/main/design-document.md
