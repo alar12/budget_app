@@ -3,14 +3,17 @@ const SavingsPlan = require('../models/SavingsPlan');
 // Create a new savings plan
 exports.createPlan = async (req, res) => {
   try {
-    const { principal, interestRate, termLength, dueDate } = req.body;
+    const { goal, amount, percentage, amountToSavePerMonth, monthsRequired, currentMonth, wallet } = req.body;
 
     // Create a new instance of SavingsPlan using the request body
     const newPlan = new SavingsPlan({
-      principal,
-      interestRate,
-      termLength,
-      dueDate
+      goal,
+      amount,
+      percentage,
+      amountToSavePerMonth,
+      monthsRequired,
+      currentMonth,
+      wallet
     });
 
     // Save the new plan to the database

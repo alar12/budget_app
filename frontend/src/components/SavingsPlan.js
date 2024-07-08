@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Grid, Paper, TextField, Button, Typography, LinearProgress } from '@material-ui/core';
 import Navbar from './navbar';
 
@@ -19,10 +19,11 @@ const SavingsPlan = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const amountToSavePerMonth = (disposableIncome * formData.percentage) / 100;
     const monthsRequired = Math.ceil(formData.amount / amountToSavePerMonth);
+
     const newPlan = {
       goal: formData.goal,
       amount: parseFloat(formData.amount),
@@ -32,7 +33,26 @@ const SavingsPlan = () => {
       currentMonth: 0,
       wallet: 0
     };
-    setPlans([...plans, newPlan]);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/savings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newPlan),
+      });
+
+      if (response.ok) {
+        const savedPlan = await response.json();
+        setPlans([...plans, savedPlan]);
+      } else {
+        console.error('Failed to save the plan');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+
     setFormData({
       goal: '',
       amount: '',
@@ -44,13 +64,11 @@ const SavingsPlan = () => {
     setPlans((prevPlans) =>
       prevPlans.map((plan) => {
         if (plan.currentMonth < plan.monthsRequired) {
-          // Check if current month matches the planned completion month
           const isCurrentMonth = plan.currentMonth === currentMonth % plan.monthsRequired;
           if (isCurrentMonth) {
             let amountToSave = plan.amountToSavePerMonth;
             if (plan.currentMonth === plan.monthsRequired - 1) {
-              // Last month: Adjust amount to save based on remaining goal amount
-              amountToSave = plan.amount - plan.wallet; // Only save remaining amount needed
+              amountToSave = plan.amount - plan.wallet;
             }
 
             const updatedWallet = plan.wallet + amountToSave;
@@ -63,26 +81,36 @@ const SavingsPlan = () => {
         return plan;
       })
     );
-    setCurrentMonth(currentMonth + 1); // Move to the next month
+    setCurrentMonth(currentMonth + 1);
   };
 
-  // Function to simulate monthly updates (runs every second)
   const startMonthlyUpdates = () => {
     const interval = setInterval(() => {
       updatePlan();
     }, 1000); // Update every second to simulate monthly update
 
-    return () => clearInterval(interval); // Clear interval on unmount
+    return () => clearInterval(interval);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/savings');
+        const data = await response.json();
+        setPlans(data);
+      } catch (error) {
+        console.error('Error fetching plans:', error);
+      }
+    };
+
+    fetchPlans();
+
     const handle = startMonthlyUpdates();
     return () => {
       clearInterval(handle);
     };
   }, []);
 
-  // Function to render upcoming months in a calendar-like grid with abbreviated month names and current dates
   const renderMonthsGrid = (plan) => {
     const currentMonthIndex = new Date().getMonth();
     const currentDay = new Date().getDate(); // Get current date

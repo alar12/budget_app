@@ -8,7 +8,7 @@ router.post('/AdminLogin', adminLogIn);
 router.get('/Admin/:id', getAdminDetail);
 
 // Savings
-router.post('/savings', createPlan);
-router.get('/savings', getPlans);
+router.post('/api/savings', createPlan);
+router.get('/api/savings', getPlans);
 
 module.exports = router;

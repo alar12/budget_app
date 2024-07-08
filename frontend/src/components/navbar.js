@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { AuthContext } from './AuthContext';
@@ -20,10 +20,11 @@ const useStyles = makeStyles((theme) => ({
 const Navbar = () => {
   const classes = useStyles();
   const { isLoggedIn, logout } = useContext(AuthContext);
-  const location = useLocation();
 
+  let navigate = useNavigate();
   const handleLogout = () => {
     logout();
+    navigate('/');
   };
 
   return (
