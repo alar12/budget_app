@@ -42,3 +42,37 @@ exports.getPlans = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch savings plans' });
   }
 };
+
+// Update a savings plan by ID
+exports.updatePlan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { goal, amount, percentage, amountToSavePerMonth, monthsRequired, currentMonth, wallet } = req.body;
+
+    // Find the savings plan by ID
+    let plan = await SavingsPlan.findById(id);
+
+    if (!plan) {
+      return res.status(404).json({ error: 'Savings plan not found' });
+    }
+
+    // Update the plan properties
+    plan.goal = goal;
+    plan.amount = amount;
+    plan.percentage = percentage;
+    plan.amountToSavePerMonth = amountToSavePerMonth;
+    plan.monthsRequired = monthsRequired;
+    plan.currentMonth = currentMonth;
+    plan.wallet = wallet;
+
+    // Save the updated plan
+    const updatedPlan = await plan.save();
+
+    // Send the updated plan back as a JSON response
+    res.status(200).json(updatedPlan);
+  } catch (err) {
+    // Handle errors and send an error response
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update the savings plan' });
+  }
+};

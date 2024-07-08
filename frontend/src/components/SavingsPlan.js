@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Grid, Paper, TextField, Button, Typography, LinearProgress } from '@material-ui/core';
+import { Container, Grid, Paper, TextField, Button, Typography, LinearProgress, FormControlLabel, Checkbox } from '@material-ui/core';
 import Navbar from './navbar';
 
 const initialDisposableIncome = 1000; // Hardcoded disposable income
@@ -60,6 +60,37 @@ const SavingsPlan = () => {
     });
   };
 
+  const handleAdvancePayment = async (planIndex) => {
+    const updatedPlans = plans.map((plan, index) => {
+      if (index === planIndex) {
+        const amountToSavePerMonth = plan.amountToSavePerMonth;
+        const updatedWallet = plan.wallet + amountToSavePerMonth;
+        const updatedDisposableIncome = disposableIncome - amountToSavePerMonth;
+        setDisposableIncome(updatedDisposableIncome);
+        return { ...plan, currentMonth: plan.currentMonth + 1, wallet: updatedWallet };
+      }
+      return plan;
+    });
+
+    setPlans(updatedPlans);
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/savings/${plans[planIndex]._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedPlans[planIndex]),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to update the plan');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   const updatePlan = () => {
     setPlans((prevPlans) =>
       prevPlans.map((plan) => {
@@ -103,15 +134,14 @@ const SavingsPlan = () => {
       }
     };
 
-    fetchPlans();
+    const interval = setInterval(fetchPlans, 6000); // Fetch plans every 5 seconds
 
-    const handle = startMonthlyUpdates();
-    return () => {
-      clearInterval(handle);
-    };
+    fetchPlans(); // Initial fetch
+
+    return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []);
 
-  const renderMonthsGrid = (plan) => {
+  const renderMonthsGrid = (plan, planIndex) => {
     const currentMonthIndex = new Date().getMonth();
     const currentDay = new Date().getDate(); // Get current date
 
@@ -120,7 +150,7 @@ const SavingsPlan = () => {
     return (
       <Grid container spacing={2} justify="center">
         {Array.from({ length: plan.monthsRequired }, (_, i) => {
-          const isCompleted = plan.currentMonth > i;
+          const isCompleted = plan.currentMonth >= i;
           const monthIndex = (currentMonthIndex + i) % 12; // Cycle through months starting from current month
           const date = new Date(new Date().getFullYear(), currentMonthIndex + i, currentDay).toLocaleDateString('en-US', {
             day: 'numeric'
@@ -140,6 +170,11 @@ const SavingsPlan = () => {
               >
                 {monthNames[monthIndex]} {date}
               </Paper>
+              {isCompleted && i === plan.currentMonth && (
+                <Button variant="contained" color="secondary" onClick={() => handleAdvancePayment(planIndex)}>
+                  Pay this
+                </Button>
+              )}
             </Grid>
           );
         })}
@@ -210,7 +245,7 @@ const SavingsPlan = () => {
               value={(plan.currentMonth / plan.monthsRequired) * 100}
               style={{ margin: '20px 0' }}
             />
-            {renderMonthsGrid(plan)}
+            {renderMonthsGrid(plan, index)}
           </Paper>
         ))}
       </Container>

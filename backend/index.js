@@ -27,29 +27,3 @@ app.use('/', Routes);
 app.listen(PORT, () => {
     console.log(`Server started at port no. ${PORT}`);
 });
-
-// Schedule a job to run every 5 seconds
-cron.schedule('*/5 * * * * *', async () => {
-    try {
-        const plans = await SavingsPlan.find();
-        const currentMonth = new Date().getMonth();
-        plans.forEach(async (plan) => {
-            if (plan.currentMonth < plan.monthsRequired) {
-                const isCurrentMonth = plan.currentMonth === currentMonth % plan.monthsRequired;
-                if (isCurrentMonth) {
-                    let amountToSave = plan.amountToSavePerMonth;
-                    if (plan.currentMonth === plan.monthsRequired - 1) {
-                        amountToSave = plan.amount - plan.wallet;
-                    }
-
-                    plan.wallet += amountToSave;
-                    plan.currentMonth += 1;
-                    await plan.save();
-                }
-            }
-        });
-        console.log('Savings plans updated');
-    } catch (error) {
-        console.error('Error updating savings plans:', error);
-    }
-});
