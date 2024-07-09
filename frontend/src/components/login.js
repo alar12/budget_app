@@ -42,6 +42,7 @@ const LoginPage = () => {
       console.log(token);
       localStorage.setItem('token', token);
       navigate('/home');
+      window.location.reload();
 
     } catch (error) {
       console.error(error);

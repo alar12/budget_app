@@ -1,7 +1,8 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import { AuthContext } from './AuthContext';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,10 +19,13 @@ const useStyles = makeStyles((theme) => ({
 
 const Navbar = () => {
   const classes = useStyles();
-  const location = useLocation();
+  const { isLoggedIn, logout } = useContext(AuthContext);
 
-  // Function to determine if current location is home
-  const isHome = location.pathname === '/home';
+  let navigate = useNavigate();
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <div className={classes.root}>
@@ -30,9 +34,23 @@ const Navbar = () => {
           <Typography variant="h6" className={classes.title}>
             My Budget App
           </Typography>
-          
-          {/* Conditional rendering based on current location */}
-          {!isHome ? (
+          {isLoggedIn ? (
+            <>
+              <Button color="inherit">
+                <Link to="/home" className={classes.link}>
+                  Home
+                </Link>
+              </Button>
+              <Button color="inherit">
+                <Link to="/savings-plan" className={classes.link}>
+                  Savings Plan
+                </Link>
+              </Button>
+              <Button color="inherit" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          ) : (
             <>
               <Button color="inherit">
                 <Link to="/" className={classes.link}>
@@ -50,19 +68,6 @@ const Navbar = () => {
                 </Link>
               </Button>
             </>
-          ) : (
-            <>
-              <Button color="inherit">
-                <Link to="/home" className={classes.link}>
-                  Home
-                </Link>
-              </Button>
-              <Button color="inherit">
-                <Link to="/" className={classes.link}>
-                  Logout
-                </Link>
-            </Button>
-          </>
           )}
         </Toolbar>
       </AppBar>
