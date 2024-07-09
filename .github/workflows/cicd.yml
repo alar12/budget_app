@@ -10,7 +10,7 @@ on:
 
 jobs:
   lint:
-    name: Lint
+    name: CI/CD
     runs-on: ubuntu-latest
 
     steps:
