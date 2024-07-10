@@ -10,8 +10,8 @@ on:
 
 jobs:
   lint:
-    name: Lint
-    runs-on: ubuntu-latest
+    name: CI/CD
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
@@ -31,13 +31,3 @@ jobs:
         run: |
           cd backend
           npm install
-
-      - name: Run App (Frontend)
-        run: |
-          cd frontend
-          npm start
-
-      - name: Run App (Backend)
-        run: |
-          cd backend
-          npm start
