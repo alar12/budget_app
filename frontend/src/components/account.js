@@ -113,6 +113,33 @@ const Account = () => {
     return transactions.reduce((acc, transaction) => acc + parseFloat(transaction.amount), 0).toFixed(2);
   };
 
+  useEffect(() => {
+    const updateDisposableIncome = async () => {
+      try {
+        const newDisposableIncome = calculateBalance();
+
+        const response = await fetch('http://localhost:5000/api/disposable-income', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ amount: newDisposableIncome }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Disposable income updated:', data);
+        } else {
+          console.error('Failed to update disposable income');
+        }
+      } catch (error) {
+        console.error('Failed to update disposable income:', error);
+      }
+    };
+
+    updateDisposableIncome();
+  }, [transactions]);
+
   return (
     <div>
       <Navbar /> {/* Include the Navbar here */}

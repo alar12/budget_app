@@ -1,7 +1,8 @@
 const router = require('express').Router();
 const { adminRegister, adminLogIn, getAdminDetail } = require('../controllers/authController');
 const { createPlan, getPlans, updatePlan } = require('../controllers/savingsController');
-const { addTransaction, getTransactions, updateTransaction, deleteTransaction } = require('../controllers/transactionsController.js');
+const { addTransaction, getTransactions, updateTransaction, deleteTransaction } = require('../controllers/transactionsController');
+const { getDisposableIncome, updateDisposableIncome } = require('../controllers/disposableIncomeController');
 
 // Admin
 router.post('/AdminReg', adminRegister);
@@ -18,5 +19,9 @@ router.post('/api/transactions', addTransaction);
 router.get('/api/transactions', getTransactions);
 router.put('/api/transactions/:id', updateTransaction);
 router.delete('/api/transactions/:id', deleteTransaction);
+
+// Disposable Income
+router.get('/api/disposable-income', getDisposableIncome);
+router.post('/api/disposable-income', updateDisposableIncome);
 
 module.exports = router;
