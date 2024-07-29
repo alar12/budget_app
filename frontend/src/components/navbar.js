@@ -46,6 +46,11 @@ const Navbar = () => {
                   Savings Plan
                 </Link>
               </Button>
+              <Button color="inherit">
+                <Link to="/account" className={classes.link}>
+                  Account
+                </Link>
+              </Button>
               <Button color="inherit" onClick={handleLogout}>
                 Logout
               </Button>

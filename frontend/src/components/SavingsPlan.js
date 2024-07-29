@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Grid, Paper, TextField, Button, Typography, LinearProgress, FormControlLabel, Checkbox } from '@material-ui/core';
+import { Container, Grid, Paper, TextField, Button, Typography, LinearProgress } from '@material-ui/core';
 import Navbar from './navbar';
-
-const initialDisposableIncome = 1000; // Hardcoded disposable income
 
 const SavingsPlan = () => {
   const [formData, setFormData] = useState({
@@ -13,7 +11,38 @@ const SavingsPlan = () => {
 
   const [plans, setPlans] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()); // Get current month index (0-11)
-  const [disposableIncome, setDisposableIncome] = useState(initialDisposableIncome);
+  const [disposableIncome, setDisposableIncome] = useState(null); // Initially null
+
+  useEffect(() => {
+    // Fetch disposable income from the server and set it
+    const fetchDisposableIncome = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/disposable-income');
+        const data = await response.json();
+        setDisposableIncome(data.amount); // Adjust according to the response structure
+      } catch (error) {
+        console.error('Failed to fetch disposable income:', error);
+      }
+    };
+
+    fetchDisposableIncome(); // Fetch disposable income on component mount
+
+    const fetchPlans = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/savings');
+        const data = await response.json();
+        setPlans(data);
+      } catch (error) {
+        console.error('Error fetching plans:', error);
+      }
+    };
+
+    const interval = setInterval(fetchPlans, 6000); // Fetch plans every 6 seconds
+
+    fetchPlans(); // Initial fetch for plans
+
+    return () => clearInterval(interval); // Cleanup interval on component unmount
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,6 +50,10 @@ const SavingsPlan = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (disposableIncome === null) {
+      console.error('Disposable income is not available');
+      return;
+    }
     const amountToSavePerMonth = (disposableIncome * formData.percentage) / 100;
     const monthsRequired = Math.ceil(formData.amount / amountToSavePerMonth);
 
@@ -61,6 +94,10 @@ const SavingsPlan = () => {
   };
 
   const handleAdvancePayment = async (planIndex) => {
+    if (disposableIncome === null) {
+      console.error('Disposable income is not available');
+      return;
+    }
     const updatedPlans = plans.map((plan, index) => {
       if (index === planIndex) {
         const amountToSavePerMonth = plan.amountToSavePerMonth;
@@ -124,22 +161,9 @@ const SavingsPlan = () => {
   };
 
   useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/savings');
-        const data = await response.json();
-        setPlans(data);
-      } catch (error) {
-        console.error('Error fetching plans:', error);
-      }
-    };
-
-    const interval = setInterval(fetchPlans, 6000); // Fetch plans every 5 seconds
-
-    fetchPlans(); // Initial fetch
-
-    return () => clearInterval(interval); // Cleanup interval on component unmount
-  }, []);
+    const interval = startMonthlyUpdates();
+    return () => interval(); // Cleanup interval on component unmount
+  }, [updatePlan]);
 
   const renderMonthsGrid = (plan, planIndex) => {
     const currentMonthIndex = new Date().getMonth();
@@ -231,7 +255,7 @@ const SavingsPlan = () => {
           </form>
         </Paper>
         <Paper elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
-          <Typography variant="h5">Disposable Income: ${disposableIncome.toFixed(2)}</Typography>
+          <Typography variant="h5">Disposable Income: ${disposableIncome !== null ? disposableIncome.toFixed(2) : 'Loading...'}</Typography>
         </Paper>
         {plans.map((plan, index) => (
           <Paper key={index} elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>

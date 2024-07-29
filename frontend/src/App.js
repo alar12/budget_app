@@ -7,6 +7,7 @@ import Register from './components/register';
 import ForgotPassword from './components/forgotpassword';
 import SavingsPlan from './components/SavingsPlan';
 import { AuthProvider } from './components/AuthContext';
+import Account from './components/account';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route exact path="/home" element={<Home />} />
           <Route exact path="/forgot-password" element={<ForgotPassword />} />
           <Route exact path="/savings-plan" element={<SavingsPlan />} />
+          <Route exact path="/account" element={<Account />} />
         </Routes>
       </Router>
     </AuthProvider>
