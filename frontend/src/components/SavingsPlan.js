@@ -98,6 +98,15 @@ const SavingsPlan = () => {
       console.error('Disposable income is not available');
       return;
     }
+  
+    // Retrieve the selected plan
+    const selectedPlan = plans[planIndex];
+    const amountToSavePerMonth = selectedPlan.amountToSavePerMonth;
+    const updatedWallet = selectedPlan.wallet + amountToSavePerMonth;
+    const updatedDisposableIncome = disposableIncome - amountToSavePerMonth;
+  
+    // Update local state
+    setDisposableIncome(updatedDisposableIncome);
     const updatedPlans = plans.map((plan, index) => {
       if (index === planIndex) {
         const amountToSavePerMonth = plan.amountToSavePerMonth;
@@ -108,9 +117,8 @@ const SavingsPlan = () => {
       }
       return plan;
     });
-
     setPlans(updatedPlans);
-
+  
     try {
       const response = await fetch(`http://localhost:5000/api/savings/${plans[planIndex]._id}`, {
         method: 'PUT',
@@ -119,14 +127,33 @@ const SavingsPlan = () => {
         },
         body: JSON.stringify(updatedPlans[planIndex]),
       });
-
+  
       if (!response.ok) {
         console.error('Failed to update the plan');
+        return;
+      }
+  
+      // Add a negative transaction for the deduction
+      const transactionResponse = await fetch('http://localhost:5000/api/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: selectedPlan.goal,
+          description: 'Savings plan deduction',
+          amount: -amountToSavePerMonth,
+          date: new Date().toISOString(),
+        }),
+      });
+  
+      if (!transactionResponse.ok) {
+        console.error('Failed to add the transaction');
       }
     } catch (error) {
       console.error('Error:', error);
     }
-  };
+  };  
 
   const updatePlan = () => {
     setPlans((prevPlans) =>
