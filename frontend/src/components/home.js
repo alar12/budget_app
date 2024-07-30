@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from '@mui/material';
-import { Bar, Line, Doughnut, Pie } from 'react-chartjs-2';
+import { Container, Typography, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import Navbar from './navbar';
 
@@ -11,6 +11,7 @@ const Home = () => {
   const [plans, setPlans] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [disposableIncome, setDisposableIncome] = useState(0);
+  const [frequencyData, setFrequencyData] = useState({});
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -28,6 +29,7 @@ const Home = () => {
         const response = await fetch('http://localhost:5000/api/transactions');
         const data = await response.json();
         setTransactions(data);
+        calculateFrequency(data);
       } catch (error) {
         console.error('Error fetching transactions:', error);
       }
@@ -47,6 +49,31 @@ const Home = () => {
     fetchTransactions();
     fetchDisposableIncome();
   }, []);
+
+  const calculateFrequency = (data) => {
+    const frequency = {
+      'Weekly': 0,
+      'Bi-weekly': 0,
+      'Monthly': 0,
+    };
+
+    data.forEach(transaction => {
+      const date = new Date(transaction.date);
+      const now = new Date();
+      const diffTime = Math.abs(now - date);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 7) {
+        frequency['Weekly'] += transaction.amount;
+      } else if (diffDays <= 14) {
+        frequency['Bi-weekly'] += transaction.amount;
+      } else {
+        frequency['Monthly'] += transaction.amount;
+      }
+    });
+
+    setFrequencyData(frequency);
+  };
 
   const planData = {
     labels: plans.map(plan => plan.goal),
@@ -118,6 +145,19 @@ const Home = () => {
     ],
   };
 
+  const frequencyChartData = {
+    labels: Object.keys(frequencyData),
+    datasets: [
+      {
+        label: 'Frequency of Transactions',
+        data: Object.values(frequencyData),
+        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+        borderColor: 'rgba(255, 159, 64, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
+
   const transactionTableRows = transactions.map(transaction => (
     <TableRow key={transaction._id}>
       <TableCell>{transaction.title}</TableCell>
@@ -166,6 +206,12 @@ const Home = () => {
             <Paper elevation={3} style={{ padding: '20px' }}>
               <Typography variant="h6">Transactions Distribution</Typography>
               <Pie data={transactionPieData} />
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Paper elevation={3} style={{ padding: '20px' }}>
+              <Typography variant="h6">Frequency of Transactions</Typography>
+              <Bar data={frequencyChartData} />
             </Paper>
           </Grid>
           <Grid item xs={12} md={6}>
