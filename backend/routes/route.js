@@ -3,6 +3,7 @@ const { adminRegister, adminLogIn, getAdminDetail } = require('../controllers/au
 const { createPlan, getPlans, updatePlan } = require('../controllers/savingsController');
 const { addTransaction, getTransactions, updateTransaction, deleteTransaction } = require('../controllers/transactionsController');
 const { getDisposableIncome, updateDisposableIncome } = require('../controllers/disposableIncomeController');
+const { getForecastingData } = require('../controllers/forecastController');
 
 // Admin
 router.post('/AdminReg', adminRegister);
@@ -23,5 +24,8 @@ router.delete('/api/transactions/:id', deleteTransaction);
 // Disposable Income
 router.get('/api/disposable-income', getDisposableIncome);
 router.post('/api/disposable-income', updateDisposableIncome);
+
+// Forecasting
+router.get('/api/forecast', getForecastingData);
 
 module.exports = router;

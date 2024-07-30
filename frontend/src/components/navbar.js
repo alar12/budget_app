@@ -42,13 +42,13 @@ const Navbar = () => {
                 </Link>
               </Button>
               <Button color="inherit">
-                <Link to="/savings-plan" className={classes.link}>
-                  Savings Plan
+                <Link to="/account" className={classes.link}>
+                  Account
                 </Link>
               </Button>
               <Button color="inherit">
-                <Link to="/account" className={classes.link}>
-                  Account
+                <Link to="/savings-plan" className={classes.link}>
+                  Savings Plan
                 </Link>
               </Button>
               <Button color="inherit" onClick={handleLogout}>
