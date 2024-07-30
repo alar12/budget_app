@@ -1,12 +1,261 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Container, Typography, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Bar, Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import Navbar from './navbar';
 
+// Register ChartJS components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
+
 const Home = () => {
+  const [plans, setPlans] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [disposableIncome, setDisposableIncome] = useState(0);
+  const [frequencyData, setFrequencyData] = useState({});
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/savings');
+        const data = await response.json();
+        setPlans(data);
+      } catch (error) {
+        console.error('Error fetching savings plans:', error);
+      }
+    };
+
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/transactions');
+        const data = await response.json();
+        setTransactions(data);
+        calculateFrequency(data);
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+      }
+    };
+
+    const fetchDisposableIncome = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/disposable-income');
+        const data = await response.json();
+        setDisposableIncome(data.amount);
+      } catch (error) {
+        console.error('Error fetching disposable income:', error);
+      }
+    };
+
+    fetchPlans();
+    fetchTransactions();
+    fetchDisposableIncome();
+  }, []);
+
+  const calculateFrequency = (data) => {
+    const frequency = {
+      'Weekly': 0,
+      'Bi-weekly': 0,
+      'Monthly': 0,
+    };
+
+    data.forEach(transaction => {
+      const date = new Date(transaction.date);
+      const now = new Date();
+      const diffTime = Math.abs(now - date);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 7) {
+        frequency['Weekly'] += transaction.amount;
+      } else if (diffDays <= 14) {
+        frequency['Bi-weekly'] += transaction.amount;
+      } else {
+        frequency['Monthly'] += transaction.amount;
+      }
+    });
+
+    setFrequencyData(frequency);
+  };
+
+  const planData = {
+    labels: plans.map(plan => plan.goal),
+    datasets: [
+      {
+        label: 'Monthly Savings Required',
+        data: plans.map(plan => plan.amountToSavePerMonth),
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const transactionData = {
+    labels: transactions.map(transaction => transaction.title),
+    datasets: [
+      {
+        label: 'Transaction Amounts',
+        data: transactions.map(transaction => transaction.amount),
+        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+        borderColor: 'rgba(153, 102, 255, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const planPieData = {
+    labels: plans.map(plan => plan.goal),
+    datasets: [
+      {
+        data: plans.map(plan => plan.amount),
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.2)',
+          'rgba(54, 162, 235, 0.2)',
+          'rgba(255, 206, 86, 0.2)',
+          'rgba(75, 192, 192, 0.2)',
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const transactionPieData = {
+    labels: transactions.map(transaction => transaction.title),
+    datasets: [
+      {
+        data: transactions.map(transaction => transaction.amount),
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.2)',
+          'rgba(54, 162, 235, 0.2)',
+          'rgba(255, 206, 86, 0.2)',
+          'rgba(75, 192, 192, 0.2)',
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const frequencyChartData = {
+    labels: Object.keys(frequencyData),
+    datasets: [
+      {
+        label: 'Frequency of Transactions',
+        data: Object.values(frequencyData),
+        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+        borderColor: 'rgba(255, 159, 64, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const transactionTableRows = transactions.map(transaction => (
+    <TableRow key={transaction._id}>
+      <TableCell>{transaction.title}</TableCell>
+      <TableCell>{transaction.description}</TableCell>
+      <TableCell>{transaction.amount.toFixed(2)}</TableCell>
+      <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
+    </TableRow>
+  ));
+
+  const planTableRows = plans.map(plan => (
+    <TableRow key={plan._id}>
+      <TableCell>{plan.goal}</TableCell>
+      <TableCell>${plan.amount.toFixed(2)}</TableCell>
+      <TableCell>${plan.amountToSavePerMonth.toFixed(2)}</TableCell>
+      <TableCell>{plan.monthsRequired}</TableCell>
+    </TableRow>
+  ));
+
   return (
     <div>
       <Navbar />
-      <h2>Welcome to Home Page</h2>
-      <p>This is the home page of our application.</p>
+      <Container maxWidth="lg">
+        <Typography variant="h4" gutterBottom>
+          Dashboard
+        </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Paper elevation={3} style={{ padding: '20px' }}>
+              <Typography variant="h6">Savings Plans Overview</Typography>
+              <Bar data={planData} />
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Paper elevation={3} style={{ padding: '20px' }}>
+              <Typography variant="h6">Savings Plans Distribution</Typography>
+              <Pie data={planPieData} />
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Paper elevation={3} style={{ padding: '20px' }}>
+              <Typography variant="h6">Transactions Overview</Typography>
+              <Bar data={transactionData} />
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Paper elevation={3} style={{ padding: '20px' }}>
+              <Typography variant="h6">Transactions Distribution</Typography>
+              <Pie data={transactionPieData} />
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Paper elevation={3} style={{ padding: '20px' }}>
+              <Typography variant="h6">Frequency of Transactions</Typography>
+              <Bar data={frequencyChartData} />
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Paper elevation={3} style={{ padding: '20px' }}>
+              <Typography variant="h6">Savings Plans Table</Typography>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Goal</TableCell>
+                      <TableCell>Amount</TableCell>
+                      <TableCell>Monthly Savings</TableCell>
+                      <TableCell>Months Required</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {planTableRows}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Paper elevation={3} style={{ padding: '20px' }}>
+              <Typography variant="h6">Transactions Table</Typography>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Title</TableCell>
+                      <TableCell>Description</TableCell>
+                      <TableCell>Amount</TableCell>
+                      <TableCell>Date</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {transactionTableRows}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          </Grid>
+        </Grid>
+      </Container>
     </div>
   );
 };

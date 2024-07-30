@@ -1,39 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Grid, TextField, Button, Paper, IconButton } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Container, Typography, Grid, TextField, Button, Paper, IconButton } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { jsPDF } from 'jspdf';
 import Navbar from './navbar';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    padding: theme.spacing(4),
-  },
-  paper: {
-    padding: theme.spacing(2),
-    marginBottom: theme.spacing(2),
-  },
-  form: {
-    marginBottom: theme.spacing(2),
-  },
-  actions: {
-    display: 'flex',
-    justifyContent: 'space-between',
-  },
-  button: {
-    marginTop: theme.spacing(2),
-  },
-  balance: {
-    marginBottom: theme.spacing(2),
-  },
+// Define styles using the styled API from MUI v5
+const RootContainer = styled(Container)(({ theme }) => ({
+  padding: theme.spacing(4),
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+}));
+
+const FormContainer = styled('form')(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
+
+const ActionsContainer = styled(Grid)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+}));
+
+const ButtonStyled = styled(Button)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+}));
+
+const BalanceText = styled(Typography)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
 }));
 
 const Account = () => {
-  const classes = useStyles();
   const [transactions, setTransactions] = useState([]);
   const [form, setForm] = useState({ title: '', description: '', amount: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -140,18 +148,44 @@ const Account = () => {
     updateDisposableIncome();
   }, [transactions]);
 
+  const filterTransactions = () => {
+    if (!startDate || !endDate) return transactions;
+    return transactions.filter(transaction => {
+      const date = new Date(transaction.date);
+      return date >= startDate && date <= endDate;
+    });
+  };
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    doc.text('Transaction Statement', 10, 10);
+    doc.text(`From: ${startDate?.toLocaleDateString()}`, 10, 20);
+    doc.text(`To: ${endDate?.toLocaleDateString()}`, 10, 30);
+
+    const filteredTransactions = filterTransactions();
+    let y = 40;
+    filteredTransactions.forEach(transaction => {
+      doc.text(`Title: ${transaction.title}`, 10, y);
+      doc.text(`Amount: $${transaction.amount}`, 10, y + 10);
+      doc.text(`Description: ${transaction.description}`, 10, y + 20);
+      y += 30;
+    });
+
+    doc.save('statement.pdf');
+  };
+
   return (
     <div>
-      <Navbar /> {/* Include the Navbar here */}
-      <Container className={classes.root}>
+      <Navbar />
+      <RootContainer>
         <Typography variant="h4" gutterBottom>
           Account Transactions
         </Typography>
-        <Paper className={classes.paper}>
-          <Typography variant="h6" className={classes.balance}>
+        <StyledPaper>
+          <Typography variant="h6" sx={{ mb: 2 }}>
             Current Balance: ${calculateBalance()}
           </Typography>
-          <form className={classes.form} onSubmit={handleSubmit}>
+          <FormContainer onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -184,20 +218,51 @@ const Account = () => {
                 />
               </Grid>
             </Grid>
-            <Button className={classes.button} type="submit" variant="contained" color="primary" fullWidth>
+            <ButtonStyled type="submit" variant="contained" color="primary" fullWidth>
               {isEditing ? 'Update Transaction' : 'Add Transaction'}
-            </Button>
-          </form>
-        </Paper>
+            </ButtonStyled>
+          </FormContainer>
+        </StyledPaper>
+
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Grid container spacing={3} sx={{ mb: 2 }}>
+            <Grid item xs={12} sm={6}>
+              <DatePicker
+                label="Start Date"
+                value={startDate}
+                onChange={(date) => setStartDate(date)}
+                renderInput={(props) => <TextField {...props} variant="outlined" fullWidth />}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <DatePicker
+                label="End Date"
+                value={endDate}
+                onChange={(date) => setEndDate(date)}
+                renderInput={(props) => <TextField {...props} variant="outlined" fullWidth />}
+              />
+            </Grid>
+          </Grid>
+        </LocalizationProvider>
+
+        <ButtonStyled
+          variant="contained"
+          color="secondary"
+          fullWidth
+          onClick={generatePDF}
+        >
+          Download Statement as PDF
+        </ButtonStyled>
+
         {transactions.map((transaction) => (
-          <Paper key={transaction._id} className={classes.paper}>
+          <StyledPaper key={transaction._id}>
             <Grid container>
               <Grid item xs={12} sm={8}>
                 <Typography variant="h6">{transaction.title}</Typography>
                 <Typography>Description: {transaction.description}</Typography>
                 <Typography>Amount: ${transaction.amount}</Typography>
               </Grid>
-              <Grid item xs={12} sm={4} className={classes.actions}>
+              <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <IconButton onClick={() => handleEdit(transaction)}>
                   <EditIcon color="primary" />
                 </IconButton>
@@ -206,9 +271,9 @@ const Account = () => {
                 </IconButton>
               </Grid>
             </Grid>
-          </Paper>
+          </StyledPaper>
         ))}
-      </Container>
+      </RootContainer>
     </div>
   );
 };

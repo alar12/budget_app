@@ -37,7 +37,7 @@ const SavingsPlan = () => {
       }
     };
 
-    const interval = setInterval(fetchPlans, 6000); // Fetch plans every 6 seconds
+    const interval = setInterval(fetchPlans, 5000);
 
     fetchPlans(); // Initial fetch for plans
 
@@ -151,19 +151,6 @@ const SavingsPlan = () => {
     );
     setCurrentMonth(currentMonth + 1);
   };
-
-  const startMonthlyUpdates = () => {
-    const interval = setInterval(() => {
-      updatePlan();
-    }, 1000); // Update every second to simulate monthly update
-
-    return () => clearInterval(interval);
-  };
-
-  useEffect(() => {
-    const interval = startMonthlyUpdates();
-    return () => interval(); // Cleanup interval on component unmount
-  }, [updatePlan]);
 
   const renderMonthsGrid = (plan, planIndex) => {
     const currentMonthIndex = new Date().getMonth();
