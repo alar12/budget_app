@@ -9,11 +9,12 @@ const SavingsPlan = require("./models/SavingsPlan"); // Import the SavingsPlan m
 
 const PORT = process.env.PORT || 5000;
 
-dotenv.config();
+dotenv.config(); // Load environment variables from .env file
 
-app.use(express.json({ limit: '100mb' }));
-app.use(cors());
+app.use(express.json({ limit: '100mb' })); // Middleware to parse JSON requests with a limit
+app.use(cors()); // Middleware to enable Cross-Origin Resource Sharing
 
+// Connect to MongoDB using the connection URL from environment variables
 mongoose
     .connect(process.env.MONGO_URL, {
         useNewUrlParser: true,
@@ -22,8 +23,10 @@ mongoose
     .then(() => console.log("Connected to MongoDB"))
     .catch((err) => console.log("NOT CONNECTED TO NETWORK", err));
 
+// Use the defined routes for the application
 app.use('/', Routes);
 
+// Start the server and listen on the defined port
 app.listen(PORT, () => {
     console.log(`Server started at port no. ${PORT}`);
 });
