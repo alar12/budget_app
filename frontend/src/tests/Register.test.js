@@ -1,10 +1,34 @@
-import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import Register from '../components/register';
+import axios from 'axios';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthContext } from '../components/AuthContext'; // Adjust the path to where your AuthContext is defined
 
-describe('Register', () => {
-  test('renders Register component', () => {
-    render(<Register />);
-    const registerElement = screen.getByText(/REGISTER/i);
-    expect(registerElement).toBeInTheDocument();
+jest.mock('axios');
+
+const mockContextValue = {
+  isLoggedIn: false,
+  login: jest.fn(),
+  logout: jest.fn(),
+};
+
+describe('Register Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
+
+  test('renders Register component', () => {
+    render(
+      <AuthContext.Provider value={mockContextValue}>
+        <BrowserRouter>
+          <Register />
+        </BrowserRouter>
+      </AuthContext.Provider>
+    );
+    const [registerButton] = screen.getAllByRole('button', { name: /Register/i });
+    expect(registerButton).toBeInTheDocument();
+  });
+
 });
