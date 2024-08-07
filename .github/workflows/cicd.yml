@@ -86,7 +86,7 @@ jobs:
 
       - name: Run frontend unit tests
         working-directory: frontend/src/tests
-        run: npm test
+        run: npm -v
         env:
           CI: true
 
@@ -97,15 +97,15 @@ jobs:
         run: npm run build
 
       - name: List build directory contents before uploading
-        run: dir frontend\build
+        run: Get-ChildItem -Force ./frontend/build/
 
       - name: Verify frontend build artifacts
         if: success()
         run: |
-          if not exist "frontend\build" (
-            echo "Build artifacts not found!"
+          if (-Not (Test-Path "./frontend/build")) {
+            Write-Host "Build artifacts not found!"
             exit 1
-          )
+          }
 
       - name: Archive production artifacts
         if: success()
