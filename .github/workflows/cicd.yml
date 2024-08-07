@@ -50,10 +50,10 @@ jobs:
       - name: Verify frontend build artifacts
         if: success()
         run: |
-          if [ ! -d "./frontend/build" ]; then
-            echo "Build artifacts not found!"
+          if (-Not (Test-Path "./frontend/build")) {
+            Write-Host "Build artifacts not found!"
             exit 1
-          fi
+          }
 
       - name: Archive production artifacts
         if: success()
