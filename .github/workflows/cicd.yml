@@ -40,7 +40,7 @@ jobs:
 
       - name: Build frontend application
         working-directory: frontend
-        run: CI=false npm run build
+        run: set CI=false && npm run build
 
       - name: List build directory contents before uploading
         run: ls -la ./frontend/build/
@@ -90,7 +90,7 @@ jobs:
 
       - name: Build frontend application
         working-directory: frontend
-        run: npm run build
+        run: set CI=false && npm run build
 
       - name: List build directory contents before uploading
         run: dir frontend\build
