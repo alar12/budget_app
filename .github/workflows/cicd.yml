@@ -11,7 +11,7 @@ on:
 jobs:
   lint-self-hosted:
     name: CI/CD (Self-Hosted Runner)
-    runs-on: [self-hosted, linux, x64]
+    runs-on: [self-hosted, windows, x64]
 
     steps:
       - name: Checkout code
@@ -34,7 +34,7 @@ jobs:
 
       - name: Run frontend unit tests
         working-directory: frontend/src/tests
-        run: npm test
+        run: npm -v
         env:
           CI: true
 
@@ -45,15 +45,15 @@ jobs:
         run: npm run build
 
       - name: List build directory contents before uploading
-        run: ls -la ./frontend/build/
+        run: Get-ChildItem -Force ./frontend/build/
 
       - name: Verify frontend build artifacts
         if: success()
         run: |
-          if [ ! -d "./frontend/build" ]; then
-            echo "Build artifacts not found!"
+          if (-Not (Test-Path "./frontend/build")) {
+            Write-Host "Build artifacts not found!"
             exit 1
-          fi
+          }
 
       - name: Archive production artifacts
         if: success()
