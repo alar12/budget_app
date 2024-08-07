@@ -4,6 +4,6 @@ module.exports = {
     transform: {
       '^.+\\.jsx?$': 'babel-jest',
     },
-    transformIgnorePatterns: ['node_modules/(?!(YOUR_MODULE_NAME_HERE)/)'],
+    transformIgnorePatterns: ['node_modules/(?!(.*)/)'],
   };
   
