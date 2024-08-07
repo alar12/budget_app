@@ -8,9 +8,6 @@ exports.getForecastingData = async (req, res) => {
     const savingsPlans = await SavingsPlan.find();
     const transactions = await Transaction.find();
 
-    // Perform any necessary calculations or transformations here
-    // Example: Calculate total savings and forecast future savings
-
     res.status(200).json({ savingsPlans, transactions });
   } catch (err) {
     console.error(err);

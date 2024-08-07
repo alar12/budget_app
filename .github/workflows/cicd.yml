@@ -9,9 +9,9 @@ on:
       - main
 
 jobs:
-  lint:
-    name: CI/CD
-    runs-on: self-hosted
+  lint-self-hosted:
+    name: CI/CD (Self-Hosted Runner)
+    runs-on: [self-hosted, windows, x64]
 
     steps:
       - name: Checkout code
@@ -31,3 +31,81 @@ jobs:
         run: |
           cd backend
           npm install
+
+      - name: Run frontend unit tests
+        working-directory: frontend/src/tests
+        run: npm test
+        env:
+          CI: true
+
+      - name: Build frontend application
+        working-directory: frontend
+        run: CI=false npm run build
+
+      - name: List build directory contents before uploading
+        run: ls -la ./frontend/build/
+
+      - name: Verify frontend build artifacts
+        if: success()
+        run: |
+          if [ ! -d "./frontend/build" ]; then
+            echo "Build artifacts not found!"
+            exit 1
+          fi
+
+      - name: Archive production artifacts
+        if: success()
+        uses: actions/upload-artifact@v2
+        with:
+          name: production-artifacts
+          path: frontend/build/**
+
+  lint-windows:
+    name: CI/CD (Windows Runner)
+    runs-on: windows-latest
+    needs: lint-self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Install dependencies (Frontend)
+        working-directory: frontend
+        run: npm install
+
+      - name: Install dependencies (Backend)
+        working-directory: backend
+        run: npm install
+
+      - name: Run frontend unit tests
+        working-directory: frontend/src/tests
+        run: npm test
+        env:
+          CI: true
+
+      - name: Build frontend application
+        working-directory: frontend
+        run: npm run build
+
+      - name: List build directory contents before uploading
+        run: dir frontend\build
+
+      - name: Verify frontend build artifacts
+        if: success()
+        run: |
+          if not exist "frontend\build" (
+            echo "Build artifacts not found!"
+            exit 1
+          )
+
+      - name: Archive production artifacts
+        if: success()
+        uses: actions/upload-artifact@v2
+        with:
+          name: production-artifacts
+          path: frontend/build/**

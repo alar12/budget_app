@@ -128,3 +128,74 @@ To get a local copy of the project up and running, follow these steps:
 
 ## Design Document
 https://github.com/alar12/budget_app/blob/main/design-document.md
+
+## 4+1 Architectural Diagram
+```mermaid
+graph TD
+  %% Logical View
+  subgraph Logical View
+    A[User] --> B[Login Page]
+    A --> C[Savings Plan Management]
+    A --> D[Transaction Management]
+    A --> E[Dashboard]
+    C --> F[Manage Savings Plans]
+    D --> G[Add/Edit/Delete Transactions]
+    E --> H[View Charts and Tables]
+  end
+
+  %% Development View
+  subgraph Development View
+    B --> I[Login Component]
+    C --> J[SavingsPlan Component]
+    D --> K[Transaction Component]
+    E --> L[Home Component]
+    I --> M[API Integration]
+    J --> N[API Integration]
+    K --> O[API Integration]
+    L --> P[API Integration]
+  end
+
+  %% Process View
+  subgraph Process View
+    B --> Q[User Authentication Process]
+    C --> R[Savings Plan Management Process]
+    D --> S[Transaction Processing]
+    E --> T[Dashboard Update Process]
+    Q --> U[Backend API for Authentication]
+    R --> V[Backend API for Savings]
+    S --> W[Backend API for Transactions]
+    T --> X[Backend API for Dashboard Data]
+  end
+
+  %% Physical View
+  subgraph Physical View
+    X[Frontend] --> Y[Browser]
+    Y --> Z[Backend Server]
+    Z --> AA[Database]
+  end
+
+  %% Scenarios View
+  subgraph Scenarios View
+    A1[User Login] --> B
+    A2[Add Savings Plan] --> C
+    A3[Process Transaction] --> D
+    A4[View Dashboard] --> E
+  end
+
+  %% Connecting the Views
+  B -.-> I
+  B -.-> Q
+  B -.-> Y
+  C -.-> J
+  C -.-> R
+  C -.-> Y
+  D -.-> K
+  D -.-> S
+  D -.-> Y
+  E -.-> L
+  E -.-> T
+  E -.-> Y
+
+  classDef view fill:#f9f,stroke:#333,stroke-width:2px;
+  class Logical_View,Development_View,Process_View,Physical_View,Scenarios_View view;
+```
