@@ -45,7 +45,7 @@ jobs:
         run: npm run build
 
       - name: List build directory contents before uploading
-        run: ls -la ./frontend/build/
+        run: Get-ChildItem -Force ./frontend/build/
 
       - name: Verify frontend build artifacts
         if: success()
