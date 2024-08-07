@@ -34,7 +34,7 @@ jobs:
 
       - name: Run frontend unit tests
         working-directory: frontend/src/tests
-        run: npm -v
+        run: npm test
         env:
           CI: true
 
