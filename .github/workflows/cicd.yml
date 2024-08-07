@@ -11,7 +11,7 @@ on:
 jobs:
   lint-self-hosted:
     name: CI/CD (Self-Hosted Runner)
-    runs-on: self-hosted
+    runs-on: [self-hosted, windows, x64]
 
     steps:
       - name: Checkout code
